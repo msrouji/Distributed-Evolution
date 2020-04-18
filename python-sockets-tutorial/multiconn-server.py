@@ -4,6 +4,7 @@ import sys
 import socket
 import selectors
 import types
+import utils
 
 sel = selectors.DefaultSelector()
 
@@ -30,6 +31,7 @@ def service_connection(key, mask):
             sock.close()
     if mask & selectors.EVENT_WRITE:
         if data.outb:
+            print(utils.bytesToFloat(b'?\xc3\x1d\xc5\x0c\xe4\xea\xd1\x14\xec'))
             print("echoing", repr(data.outb), "to", data.addr)
             sent = sock.send(data.outb)  # Should be ready to write
             data.outb = data.outb[sent:]
