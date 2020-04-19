@@ -3,8 +3,8 @@ import struct
 def intToBytes(x: int) -> bytes:
     return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
-def intFromBytes(xbytes: bytes) -> int:
-    return int.from_bytes(xbytes, 'big')
+def intFromBytes(x: bytes) -> int:
+    return int.from_bytes(x, 'big')
 
 def floatToBytes(x: float) -> bytes:
     return struct.pack('!d', x)

@@ -1,4 +1,49 @@
-# #!/usr/bin/env python3
+import socket 
+from threading import Thread 
+from socketserver import ThreadingMixIn 
+import utils
+
+# Multithreaded Python server : TCP Server Socket Thread Pool
+class ClientThread(Thread): 
+ 
+    def __init__(self,ip,port): 
+        Thread.__init__(self) 
+        self.ip = ip 
+        self.port = port 
+        print("[+] New server socket thread started for " + ip + ":" + str(port))
+ 
+    def run(self): 
+        while True : 
+            data = conn.recv(2048) 
+            print("Server received data:", data)
+            MESSAGE = input("Multithreaded Python server : Enter Response from Server/Enter exit:")
+            if MESSAGE == 'exit':
+                break
+            conn.send(utils.stringToBytes(MESSAGE))  # echo 
+
+
+# Multithreaded Python server: TCP Server Socket Program Stub
+TCP_IP = '0.0.0.0' 
+TCP_PORT = 3000 
+BUFFER_SIZE = 1024  # Usually 1024, but we need quick response 
+
+tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
+tcpServer.bind((TCP_IP, TCP_PORT)) 
+threads = [] 
+ 
+while True: 
+    tcpServer.listen(4) 
+    print("Multithreaded Python server: Waiting for connections from TCP clients...") 
+    (conn, (ip,port)) = tcpServer.accept() 
+    newthread = ClientThread(ip,port) 
+    newthread.start() 
+    threads.append(newthread) 
+ 
+for t in threads: 
+    t.join() 
+
+### Server from tutorial
 
 # import sys
 # import socket
@@ -59,37 +104,40 @@
 # finally:
 #     sel.close()
 
-import selectors
-import socket
-import utils
 
-sel = selectors.DefaultSelector()
+### Simple Server
 
-def accept(sock, mask):
-    conn, addr = sock.accept()
-    print('accepted', conn, 'from', addr)
-    conn.setblocking(False)
-    sel.register(conn, selectors.EVENT_READ, read)
+# import selectors
+# import socket
+# import utils
 
-def read(conn, mask):
-    data = conn.recv(1000)
-    if data:
-        print(type(data))
-        print('echoing', utils.floatFromBytes(eval(repr(data))), 'to', conn)
-        conn.send(data)
-    else:
-        print('closing', conn)
-        sel.unregister(conn)
-        conn.close()
+# sel = selectors.DefaultSelector()
 
-sock = socket.socket()
-sock.bind(('localhost', 3000))
-sock.listen(100)
-sock.setblocking(False)
-sel.register(sock, selectors.EVENT_READ, accept)
+# def accept(sock, mask):
+#     conn, addr = sock.accept()
+#     print('accepted', conn, 'from', addr)
+#     conn.setblocking(False)
+#     sel.register(conn, selectors.EVENT_READ, read)
 
-while True:
-    events = sel.select()
-    for key, mask in events:
-        callback = key.data
-        callback(key.fileobj, mask)
+# def read(conn, mask):
+#     data = conn.recv(1000)
+#     if data:
+#         print(type(data))
+#         print('echoing', utils.floatFromBytes(eval(repr(data))), 'to', conn)
+#         conn.send(data)
+#     else:
+#         print('closing', conn)
+#         sel.unregister(conn)
+#         conn.close()
+
+# sock = socket.socket()
+# sock.bind(('localhost', 3000))
+# sock.listen(100)
+# sock.setblocking(False)
+# sel.register(sock, selectors.EVENT_READ, accept)
+
+# while True:
+#     events = sel.select()
+#     for key, mask in events:
+#         callback = key.data
+#         callback(key.fileobj, mask)
