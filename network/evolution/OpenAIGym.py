@@ -1,7 +1,7 @@
 import random
 import numpy as np
-from evostra import EvolutionStrategy
-from evostra import CNN2D
+from evolution.evostra import EvolutionStrategy
+from evolution.evostra import CNN2D
 import gym
 import time
 
@@ -93,8 +93,8 @@ class Agent:
             while not done:
                 action = self.get_predicted_action(observation)
 
-                memory = agent_remembers(action, observation)
-                if agent_remembers(action, observation):
+                # memory = agent_remembers(action, observation)
+                # if agent_remembers(action, observation):
                 
                 observation, reward, done, _ = self.env.step(action)
                 

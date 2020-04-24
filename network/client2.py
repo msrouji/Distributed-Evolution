@@ -1,7 +1,7 @@
 import socket
 import utils
 
-host = socket.gethostname() 
+host = "127.0.0.1"  
 port = 3000
 BUFFER_SIZE = 2000 
 MESSAGE = input("Client 2: Enter message/ Enter exit:")

@@ -1,23 +1,53 @@
 import socket
 import utils
+import json
 
-host = socket.gethostname() 
+from evolution.OpenAIGym import *
+from evolution.evostra import FeedForwardNetwork
+from evolution.evostra import CNN2D
+import numpy as np
+
+host = "127.0.0.1" 
 port = 3000
-BUFFER_SIZE = 2000 
-MESSAGE = input("Client: Enter message/ Enter exit:")
-MESSAGE = utils.stringToBytes(MESSAGE)
+BUFFER_SIZE = 2000
+json_msg = {"seed":345, "fitness":0.424546, "iter":0}
+message = json.dumps(json_msg)
+message = utils.stringToBytes(message)
  
 tcpClientA = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 tcpClientA.connect((host, port))
 
-while MESSAGE != 'exit':
-    tcpClientA.send(MESSAGE)     
-    data = tcpClientA.recv(BUFFER_SIZE)
-    print(" Client received data:", data)
-    MESSAGE = input("Client: Enter message to continue/ Enter exit:")
-    MESSAGE = utils.stringToBytes(MESSAGE)
+quit_msg = False
 
-tcpClientA.close() 
+while not quit_msg:
+    tcpClientA.send(message)     
+    data = utils.stringFromBytes(tcpClientA.recv(BUFFER_SIZE))
+    print(" Client received data:", data)
+    server_data = json.loads(data)
+    agent = Agent("LunarLander-v2",
+                3,
+                FeedForwardNetwork,
+                [16, 16],
+                population_size=40,
+                sigma=0.1,
+                learning_rate=0.01,
+                decay=0.999,
+                num_threads=6,
+                eps_avg=1,
+                wait=1.0,
+                avg_runs=1,
+                print_step=1,
+                save_step=None)
+    agent.train(100)
+    fitness = agent.play_episodes(2)
+    print(fitness)
+    json_msg = {"seed":345, "fitness":fitness, "iter":server_data["iter"]}
+    quit_msg = server_data["quit"]
+    message = json.dumps(json_msg)
+    message = utils.stringToBytes(message)
+    
+
+tcpClientA.close()
 
 
 ### Client from tutorial

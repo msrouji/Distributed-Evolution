@@ -2,6 +2,18 @@ import socket
 from threading import Thread 
 from socketserver import ThreadingMixIn 
 import utils
+import json
+
+'''
+Marshalling protocol
+
+0: base generation or noise matrix generation boolean
+1: current seed
+2: current iteration
+3: quit boolean
+'''
+
+fitnesses = []
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class ClientThread(Thread): 
@@ -12,20 +24,33 @@ class ClientThread(Thread):
         self.port = port 
         print("[+] New server socket thread started for " + ip + ":" + str(port))
  
-    def run(self): 
-        while True : 
-            data = conn.recv(2048) 
+    def run(self):
+        i = 0 
+        num_iters = 5 # int(input("Enter the number of iterations."))
+        while True: 
+            data = utils.stringFromBytes(conn.recv(2048))
             print("Server received data:", data)
-            MESSAGE = input("Multithreaded Python server : Enter Response from Server/Enter exit:")
-            if MESSAGE == 'exit':
-                break
-            conn.send(utils.stringToBytes(MESSAGE))  # echo 
+            if data!=None and data!="":
+                if True: # later: if have x% of clients
+                    i+=1
+                client_data = json.loads(data)
+                json_msg = {"quit": False}
+                json_msg["gen"] = True
+                json_msg["seed"] = 1
+                json_msg["iter"] = i
+                if i > num_iters:
+                    json_msg["quit"] = True
+                message = json.dumps(json_msg)
+                fitnesses.append(client_data["fitness"])
+                conn.send(utils.stringToBytes(message))
+                if i > num_iters:
+                    break
 
 
 # Multithreaded Python server: TCP Server Socket Program Stub
-TCP_IP = '0.0.0.0' 
-TCP_PORT = 3000 
-BUFFER_SIZE = 1024  # Usually 1024, but we need quick response 
+TCP_IP = "127.0.0.1"
+TCP_PORT = 3000
+BUFFER_SIZE = 1024
 
 tcpServer = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
 tcpServer.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) 
@@ -35,11 +60,11 @@ threads = []
 while True: 
     tcpServer.listen(4) 
     print("Multithreaded Python server: Waiting for connections from TCP clients...") 
-    (conn, (ip,port)) = tcpServer.accept() 
-    newthread = ClientThread(ip,port) 
-    newthread.start() 
-    threads.append(newthread) 
- 
+    (conn, (ip,port)) = tcpServer.accept()
+    newthread = ClientThread(ip,port)
+    newthread.start()
+    threads.append(newthread)
+
 for t in threads: 
     t.join() 
 

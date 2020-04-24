@@ -1,6 +1,6 @@
 import random
 import numpy as np
-from evostra import EvolutionStrategy
+from evolution.evostra import EvolutionStrategy
 import gym
 
 class Agent:
@@ -98,6 +98,7 @@ class Agent:
             pass
 
         print("Average reward across "+str(num_eps)+" trials is "+str(total_reward / num_eps))
+        return(total_reward/num_eps)
 
 
 
