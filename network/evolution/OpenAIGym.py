@@ -120,6 +120,7 @@ class Agent:
                 total_reward += reward
 
         print("Average reward across "+str(num_eps)+" trials is "+str(total_reward / num_eps))
+        return(total_reward / num_eps)
 
 
 

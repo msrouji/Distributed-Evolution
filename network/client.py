@@ -1,6 +1,7 @@
 import socket
 import utils
 import json
+import time
 
 from evolution.OpenAIGym import *
 from evolution.evostra import FeedForwardNetwork
@@ -38,10 +39,9 @@ while not quit_msg:
                 avg_runs=1,
                 print_step=1,
                 save_step=None)
-    agent.train(100)
-    fitness = agent.play_episodes(2)
-    print(fitness)
-    json_msg = {"seed":345, "fitness":fitness, "iter":server_data["iter"]}
+    agent.train(10)
+    fitness = agent.play_episodes(2,render=False)
+    json_msg = {"seed":server_data["seed"], "fitness":fitness, "iter":server_data["iter"]}
     quit_msg = server_data["quit"]
     message = json.dumps(json_msg)
     message = utils.stringToBytes(message)

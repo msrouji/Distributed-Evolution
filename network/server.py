@@ -3,6 +3,7 @@ from threading import Thread
 from socketserver import ThreadingMixIn 
 import utils
 import json
+import random
 
 '''
 Marshalling protocol
@@ -36,7 +37,7 @@ class ClientThread(Thread):
                 client_data = json.loads(data)
                 json_msg = {"quit": False}
                 json_msg["gen"] = True
-                json_msg["seed"] = 1
+                json_msg["seed"] = random.randint(0,100000)
                 json_msg["iter"] = i
                 if i > num_iters:
                     json_msg["quit"] = True
