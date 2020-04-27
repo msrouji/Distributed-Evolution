@@ -15,6 +15,7 @@ Marshalling protocol
 '''
 
 fitnesses = []
+best_weights = None
 
 # Multithreaded Python server : TCP Server Socket Thread Pool
 class ClientThread(Thread): 
@@ -27,25 +28,41 @@ class ClientThread(Thread):
  
     def run(self):
         i = 0 
-        num_iters = 5 # int(input("Enter the number of iterations."))
+        num_iters = 10 # int(input("Enter the number of iterations."))
+        json_msg = {"quit": False}
+        json_msg["gen"] = True
+        json_msg["seed"] = random.randint(0,100000)
+        json_msg["iter"] = 0
+        json_msg["weights"] = None
+        message = json.dumps(json_msg)
+        conn.send(utils.stringToBytes(message))
+        data = ""
         while True: 
-            data = utils.stringFromBytes(conn.recv(2048))
-            print("Server received data:", data)
+            raw = conn.recv(2048)
+            data += utils.stringFromBytes(raw)
             if data!=None and data!="":
-                if True: # later: if have x% of clients
-                    i+=1
-                client_data = json.loads(data)
-                json_msg = {"quit": False}
-                json_msg["gen"] = True
-                json_msg["seed"] = random.randint(0,100000)
-                json_msg["iter"] = i
-                if i > num_iters:
-                    json_msg["quit"] = True
-                message = json.dumps(json_msg)
-                fitnesses.append(client_data["fitness"])
-                conn.send(utils.stringToBytes(message))
-                if i > num_iters:
-                    break
+                if data[-1]=="}":
+                    if True: # later: if have x% of clients
+                        i+=1
+                    client_data = json.loads(data)
+                    data = ""
+                    display = client_data.copy()
+                    display["weights"] = "weights"
+                    print("Server received data:", display)
+                    json_msg = {"quit": False}
+                    json_msg["gen"] = True
+                    json_msg["seed"] = random.randint(0,100000)
+                    json_msg["iter"] = i
+                    fitnesses.append(client_data["fitness"])
+                    best_weights = client_data["weights"]
+                    json_msg["weights"] = best_weights
+                    if i > num_iters:
+                        json_msg["quit"] = True
+                    message = json.dumps(json_msg)
+                    
+                    conn.send(utils.stringToBytes(message))
+                    if i > num_iters:
+                        break
 
 
 # Multithreaded Python server: TCP Server Socket Program Stub
@@ -62,12 +79,11 @@ while True:
     tcpServer.listen(4) 
     print("Multithreaded Python server: Waiting for connections from TCP clients...") 
     (conn, (ip,port)) = tcpServer.accept()
-    newthread = ClientThread(ip,port)
-    newthread.start()
-    threads.append(newthread)
+    ct = ClientThread(ip,port)
+    Thread(target=ct.run(), args=((conn, (ip,port)),)).start()
 
-for t in threads: 
-    t.join() 
+# for t in threads: 
+#     t.join() 
 
 ### Server from tutorial
 

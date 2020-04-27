@@ -71,6 +71,9 @@ class Agent:
     def get_weights(self):
         return self.es.weights
 
+    def set_weights(self, weights):
+        self.es.weights = weights
+
     def get_predicted_action(self, observation):
         prediction = self.model.predict(observation)
         return prediction
