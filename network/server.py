@@ -4,6 +4,7 @@ from socketserver import ThreadingMixIn
 import utils
 import json
 import random
+import multiprocessing as mp
 
 '''
 Marshalling protocol
@@ -28,7 +29,7 @@ class ClientThread(Thread):
  
     def run(self):
         i = 0 
-        num_iters = 10 # int(input("Enter the number of iterations."))
+        num_iters = 3 # int(input("Enter the number of iterations."))
         json_msg = {"quit": False}
         json_msg["gen"] = True
         json_msg["seed"] = random.randint(0,100000)
@@ -76,11 +77,15 @@ tcpServer.bind((TCP_IP, TCP_PORT))
 threads = [] 
  
 while True: 
+    print("listen")
     tcpServer.listen(4) 
     print("Multithreaded Python server: Waiting for connections from TCP clients...") 
+    print("accept")
     (conn, (ip,port)) = tcpServer.accept()
+    print("run")
     ct = ClientThread(ip,port)
     Thread(target=ct.run(), args=((conn, (ip,port)),)).start()
+    print("threaded")
 
 # for t in threads: 
 #     t.join() 
