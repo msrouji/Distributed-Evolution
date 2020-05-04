@@ -60,5 +60,3 @@ while not quit_msg:
             message = utils.stringToBytes(message)
             tcpClientA.send(message)   
     
-
-tcpClientA.close()

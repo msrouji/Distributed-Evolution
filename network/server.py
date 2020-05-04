@@ -87,6 +87,9 @@ while True:
     Thread(target=ct.run(), args=((conn, (ip,port)),)).start()
     print("threaded")
 
+    worker_args = iter((self.get_reward, p, self.weights) for p in population)
+    rewards = pool.imap_unordered(self._worker_process, worker_args)
+
 # for t in threads: 
 #     t.join() 
 
