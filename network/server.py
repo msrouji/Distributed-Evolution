@@ -65,6 +65,44 @@ class ClientThread(Thread):
                     if i > num_iters:
                         break
 
+def on_new_client(conn,addr):
+    i = 0 
+    num_iters = 3 # int(input("Enter the number of iterations."))
+    json_msg = {"quit": False}
+    json_msg["gen"] = True
+    json_msg["seed"] = random.randint(0,100000)
+    json_msg["iter"] = 0
+    json_msg["weights"] = None
+    message = json.dumps(json_msg)
+    conn.send(utils.stringToBytes(message))
+    data = ""
+    while True: 
+        raw = conn.recv(2048)
+        data += utils.stringFromBytes(raw)
+        if data!=None and data!="":
+            if data[-1]=="}":
+                if True: # later: if have x% of clients
+                    i+=1
+                client_data = json.loads(data)
+                data = ""
+                display = client_data.copy()
+                display["weights"] = "weights"
+                print("Server received data:", display)
+                json_msg = {"quit": False}
+                json_msg["gen"] = True
+                json_msg["seed"] = random.randint(0,100000)
+                json_msg["iter"] = i
+                fitnesses.append(client_data["fitness"])
+                best_weights = client_data["weights"]
+                json_msg["weights"] = best_weights
+                if i > num_iters:
+                    json_msg["quit"] = True
+                message = json.dumps(json_msg)
+                
+                conn.send(utils.stringToBytes(message))
+                if i > num_iters:
+                    break
+
 
 # Multithreaded Python server: TCP Server Socket Program Stub
 TCP_IP = "127.0.0.1"
@@ -77,21 +115,15 @@ tcpServer.bind((TCP_IP, TCP_PORT))
 threads = [] 
  
 while True: 
+    
     print("listen")
     tcpServer.listen(4) 
     print("Multithreaded Python server: Waiting for connections from TCP clients...") 
     print("accept")
-    (conn, (ip,port)) = tcpServer.accept()
-    print("run")
-    ct = ClientThread(ip,port)
-    Thread(target=ct.run(), args=((conn, (ip,port)),)).start()
+    conn, addr = tcpServer.accept()
+    Thread(target=on_new_client,args=(conn,addr)).start()
     print("threaded")
 
-    worker_args = iter((self.get_reward, p, self.weights) for p in population)
-    rewards = pool.imap_unordered(self._worker_process, worker_args)
-
-# for t in threads: 
-#     t.join() 
 
 ### Server from tutorial
 

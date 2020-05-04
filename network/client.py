@@ -13,9 +13,13 @@ import numpy as np
 host = "127.0.0.1" 
 port = 3000
 BUFFER_SIZE = 2048
- 
-tcpClientA = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-tcpClientA.connect((host, port))
+while True:
+    try:
+        tcpClientA = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
+        tcpClientA.connect((host, port))
+        break
+    except:
+        pass
 
 quit_msg = False
 
