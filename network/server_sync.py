@@ -57,6 +57,10 @@ def on_new_client_max(conn,addr):
     while True: 
         try:
             raw = conn.recv(2048)
+            if len(raw)==0:
+                print("worker lost.")
+                num_clients-=1
+                break
             data += utils.stringFromBytes(raw)
             if data!=None and data!="":
                 if data[-1]=="}":
@@ -135,6 +139,10 @@ def on_new_client_lincomb(conn,addr):
     percent_threshold = 0.99
     while True: 
         raw = conn.recv(2048)
+        print(raw,len(raw))
+        if raw==0:
+            print("worker lost.")
+            num_clients-=1
         data += utils.stringFromBytes(raw)
         if data!=None and data!="":
             if data[-1]=="}":
@@ -232,6 +240,7 @@ def main():
                 threads = [] 
                 while True: 
                     
+                    
                     print("listen")
                     tcpServer.listen(4) 
                     print("Multithreaded Python server: Waiting for connections from TCP clients...") 
@@ -282,6 +291,9 @@ def main():
             while not quit_msg:
                 try:
                     raw = tcpClientA.recv(BUFFER_SIZE)
+                    if len(raw)==0:
+                        quit_msg = True
+                        server = True
                     data += utils.stringFromBytes(raw)
                     if data!=None and data!="":
                         if data[-1]=="}":
